@@ -1,0 +1,16 @@
+# Lokale Konfiguration mit Homey IP & API-Key
+config.json
+local/
+
+# Node.js
+node_modules/
+npm-debug.log*
+
+# Betriebssystem-Dateien
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor / IDE
+.vscode/
+.idea/

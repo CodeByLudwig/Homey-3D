@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="50%" stop-color="#090d16" />
+      <stop offset="100%" stop-color="#04060a" />
+    </linearGradient>
+
+    <!-- Aurora Glows -->
+    <radialGradient id="auroraCyan" cx="30%" cy="25%" r="60%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.5" />
+      <stop offset="50%" stop-color="#0284c7" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0" />
+    </radialGradient>
+
+    <radialGradient id="auroraViolet" cx="75%" cy="70%" r="55%">
+      <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.45" />
+      <stop offset="60%" stop-color="#6366f1" stop-opacity="0.15" />
+      <stop offset="100%" stop-color="#04060a" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Glass Floor Gradient -->
+    <linearGradient id="glassFloor" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.22" />
+      <stop offset="100%" stop-color="#818cf8" stop-opacity="0.08" />
+    </linearGradient>
+
+    <!-- Neon Rim Gradient -->
+    <linearGradient id="neonRim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="50%" stop-color="#818cf8" />
+      <stop offset="100%" stop-color="#c084fc" />
+    </linearGradient>
+
+    <!-- Wall Gradients -->
+    <linearGradient id="wallLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0.95" />
+    </linearGradient>
+
+    <linearGradient id="wallRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#334155" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#1e293b" stop-opacity="0.95" />
+    </linearGradient>
+
+    <!-- Core Glow -->
+    <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="1" />
+      <stop offset="40%" stop-color="#0284c7" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#0284c7" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Subtle Border Stroke -->
+    <linearGradient id="borderStroke" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.28" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.04" />
+    </linearGradient>
+
+    <filter id="glowFilter" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="16" />
+    </filter>
+  </defs>
+
+  <!-- Background Base (Full Bleed for iOS Apple-Touch-Icon & Android Maskable) -->
+  <rect width="512" height="512" fill="#0c0f16" />
+  <rect width="512" height="512" rx="115" fill="url(#bgGrad)" />
+  <rect width="512" height="512" rx="115" fill="url(#auroraCyan)" />
+  <rect width="512" height="512" rx="115" fill="url(#auroraViolet)" />
+
+  <!-- Outer Glass Bezel -->
+  <rect x="2" y="2" width="508" height="508" rx="113" fill="none" stroke="url(#borderStroke)" stroke-width="3" />
+
+  <!-- 3D Grid / Studio floor isometric hints -->
+  <g opacity="0.18" stroke="#38bdf8" stroke-width="1.5">
+    <line x1="256" y1="365" x2="136" y2="295" />
+    <line x1="256" y1="365" x2="376" y2="295" />
+    <line x1="136" y1="295" x2="256" y2="225" />
+    <line x1="376" y1="295" x2="256" y2="225" />
+
+    <line x1="256" y1="410" x2="106" y2="323" />
+    <line x1="256" y1="410" x2="406" y2="323" />
+  </g>
+
+  <!-- Ground Shadow Plane -->
+  <ellipse cx="256" cy="385" rx="145" ry="42" fill="#000000" opacity="0.55" filter="url(#softGlow)" />
+
+  <!-- Isometric Smart Home 3D Base Platform -->
+  <!-- Floor slab: center (256, 335), Left (130, 262), Top (256, 190), Right (382, 262) -->
+  <polygon points="256,340 130,267 256,194 382,267" fill="url(#glassFloor)" stroke="url(#neonRim)" stroke-width="3" filter="url(#glowFilter)" />
+
+  <!-- 3D Isometric Walls (Back Left & Back Right) -->
+  <!-- Back Left Wall -->
+  <polygon points="130,267 256,194 256,134 130,207" fill="url(#wallLeft)" stroke="#38bdf8" stroke-width="2" stroke-opacity="0.6" />
+  <!-- Back Right Wall -->
+  <polygon points="256,194 382,267 382,207 256,134" fill="url(#wallRight)" stroke="#818cf8" stroke-width="2" stroke-opacity="0.6" />
+
+  <!-- Wall Tops (Accentuated neon rim) -->
+  <line x1="130" y1="207" x2="256" y2="134" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-opacity="0.85" />
+  <line x1="256" y1="134" x2="382" y2="207" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-opacity="0.85" />
+
+  <!-- Interior Floor Partition (Architectural Room Division) -->
+  <line x1="256" y1="194" x2="256" y2="340" stroke="#38bdf8" stroke-width="2" stroke-dasharray="6,4" stroke-opacity="0.5" />
+  <line x1="193" y1="230" x2="319" y2="303" stroke="#818cf8" stroke-width="1.5" stroke-dasharray="4,4" stroke-opacity="0.4" />
+
+  <!-- Smart Home Device Icons / Floating 3D Nodes -->
+  <!-- Node 1: Living Area Glow Dot (Cyan) -->
+  <circle cx="205" cy="280" r="14" fill="#0284c7" opacity="0.3" filter="url(#glowFilter)" />
+  <circle cx="205" cy="280" r="5" fill="#38bdf8" />
+
+  <!-- Node 2: Media/TV Glow Dot (Purple) -->
+  <circle cx="310" cy="255" r="14" fill="#7c3aed" opacity="0.3" filter="url(#glowFilter)" />
+  <circle cx="310" cy="255" r="5" fill="#a855f7" />
+
+  <!-- Central Floating Hologram / Smart Home Hub (Homey Sphere) -->
+  <!-- Floating height: cx=256, cy=245 -->
+  <!-- Pulse Rings -->
+  <ellipse cx="256" cy="250" rx="36" ry="20" fill="none" stroke="#38bdf8" stroke-width="2" stroke-opacity="0.45" />
+  <ellipse cx="256" cy="250" rx="54" ry="30" fill="none" stroke="#818cf8" stroke-width="1.5" stroke-dasharray="6,4" stroke-opacity="0.35" />
+
+  <!-- Glowing Orb Beam to Floor -->
+  <line x1="256" y1="250" x2="256" y2="267" stroke="#38bdf8" stroke-width="2" stroke-opacity="0.6" stroke-dasharray="2,2" />
+
+  <!-- Glowing Core Orb -->
+  <circle cx="256" cy="245" r="28" fill="url(#coreGlow)" filter="url(#glowFilter)" />
+  <circle cx="256" cy="245" r="18" fill="#ffffff" />
+  <circle cx="253" cy="242" r="5" fill="#e0f2fe" />
+
+  <!-- Modern 3D Spatial Framing Cube (Transparent Geometric Cube Corner) -->
+  <g stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.25" fill="none">
+    <path d="M 170,120 L 256,70 L 342,120" />
+    <line x1="256" y1="70" x2="256" y2="134" stroke-dasharray="4,4" />
+  </g>
+
+  <!-- Top Glass Sheen Arc (Apple Glass Icon Reflection) -->
+  <path d="M 12 120 C 12 55, 60 12, 125 12 L 387 12 C 452 12, 500 55, 500 120 C 370 170, 140 170, 12 120 Z" fill="#ffffff" opacity="0.04" />
+</svg>

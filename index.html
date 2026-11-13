@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Homey 3D" />
+  <meta name="application-name" content="Homey 3D Living" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#0c0f16" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <link rel="apple-touch-icon" sizes="180x180" href="icon-192.png" />
+  <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
+  <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
+  <link rel="apple-touch-icon" href="icon-512.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <link rel="manifest" href="manifest.json?v=2" />
+  <title>Homey 3D · Living</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <div id="canvas-container">
+    <div id="ambient-backdrop">
+      <div class="aurora-orb orb-1"></div>
+      <div class="aurora-orb orb-2"></div>
+      <div class="aurora-orb orb-3"></div>
+      <div class="aurora-noise"></div>
+      <div class="aurora-taskbar-blend"></div>
+    </div>
+
+    <div id="top-overlay">
+      <button class="dock-btn" onclick="setCameraPreset('iso')" data-i18n-title="top.iso_title" title="3D Schrägansicht">
+        <span class="btn-icon">📐</span>
+        <span class="btn-text" data-i18n="top.iso">3D-Ansicht</span>
+      </button>
+      <button class="dock-btn" onclick="setCameraPreset('top')" data-i18n-title="top.top_title" title="Draufsicht von oben">
+        <span class="btn-icon">⬆️</span>
+        <span class="btn-text" data-i18n="top.top">Draufsicht</span>
+      </button>
+      <button class="dock-btn" onclick="toggleFPVMode()" id="btn-fpv" data-i18n-title="top.fpv_title" title="First-Person-Rundgang durch die Wohnung (Taste V)">
+        <span class="btn-icon">🚶</span>
+        <span class="btn-text" data-i18n="top.fpv">Rundgang</span>
+      </button>
+      <button class="dock-btn" onclick="toggleLabels()" id="btn-labels" data-i18n-title="top.labels_title" title="Raum- & Geräte-Icons ein-/ausblenden">
+        <span class="btn-icon" id="btn-labels-icon">🏷️</span>
+        <span class="btn-text" id="btn-labels-text" data-i18n="top.labels_on">Icons: AN</span>
+      </button>
+      <button class="dock-btn" onclick="cycleBackgroundTheme()" id="btn-theme-cycle" data-i18n-title="top.theme_title" title="Hintergrund-Design wechseln (Bloom / Mica / OLED / Grid / Transparent)">
+        <span class="btn-icon" id="btn-theme-cycle-icon">🌌</span>
+        <span class="btn-text" id="btn-theme-cycle-text">Bloom</span>
+      </button>
+      <button class="dock-btn" onclick="toggleSidebar()" id="btn-settings" data-i18n-title="top.settings_title" title="Einstellungen ein-/ausblenden">
+        <span class="btn-icon">⚙️</span>
+        <span class="btn-text" data-i18n="top.settings">Einstellungen</span>
+      </button>
+      <button class="dock-btn" onclick="window.location.href = window.location.pathname + '?_v=' + Date.now()" data-i18n-title="top.reload_title" title="Ansicht neu laden">
+        <span class="btn-icon">🔄</span>
+      </button>
+    </div>
+
+    <div id="labels-container" class="label-layer"></div>
+    <div id="status-toast">Aktion ausgeführt!</div>
+
+    <!-- Floating House Editor HUD -->
+    <div id="house-editor-hud" class="hidden">
+      <span style="font-weight:700;color:#38bdf8;">✏️ Editor</span>
+      <span id="hud-editor-info" style="color:#cbd5e1;font-size:0.74rem;">Auswählen</span>
+      <button class="hud-pill" data-ed-tool="select" onclick="HouseEditor.setTool('select')">👆</button>
+      <button class="hud-pill" data-ed-tool="wall" onclick="HouseEditor.setTool('wall')" data-i18n="ed.tool_wall">🧱 Wand</button>
+      <button class="hud-pill" data-ed-tool="window" onclick="HouseEditor.setTool('window')" data-i18n="ed.tool_window">🪟 Fenster</button>
+      <button class="hud-pill" data-ed-tool="door" onclick="HouseEditor.setTool('door')" data-i18n="ed.tool_door">🚪 Tür</button>
+      <button class="hud-pill" data-ed-tool="room" onclick="HouseEditor.setTool('room')" data-i18n="ed.tool_room">⬜ Raum</button>
+      <button class="hud-pill" data-ed-tool="furniture" onclick="HouseEditor.setTool('furniture')" data-i18n="ed.tool_furniture">🛋️ Möbel</button>
+      <button class="hud-pill" data-ed-tool="device" onclick="HouseEditor.setTool('device')" data-i18n="ed.tool_device">💡 Gerät</button>
+      <button class="hud-pill" data-ed-tool="picture" onclick="HouseEditor.setTool('picture')" data-i18n="ed.tool_picture">🖼️ Bild</button>
+      <button class="hud-pill" data-ed-tool="fpv_start" onclick="HouseEditor.setTool('fpv_start')" data-i18n="ed.tool_fpv_start">🚶 Startpunkt</button>
+      <button class="hud-pill danger" data-ed-tool="delete" onclick="HouseEditor.setTool('delete')">🗑️</button>
+      <button class="hud-pill" onclick="HouseEditor.rotateSelectionOrGhost()" title="Drehen (Taste R)">🔄 R</button>
+      <button class="hud-pill" onclick="HouseEditor.undo()" data-i18n="hud.undo">↩️ Undo</button>
+      <button class="hud-pill" style="background:rgba(16,185,129,0.22);border-color:rgba(16,185,129,0.5);" onclick="HouseEditor.toggle(false)" data-i18n="hud.done">✅ Fertig</button>
+    </div>
+
+    <!-- Floating Light & LED Control Card -->
+    <div id="light-control-card" class="hidden">
+      <div class="ctrl-card-header">
+        <div class="ctrl-title-wrap">
+          <div id="ctrl-icon-badge" class="ctrl-icon-badge">🌈</div>
+          <div style="min-width: 0;">
+            <div id="ctrl-name" class="ctrl-name">LED Beleuchtung</div>
+            <div id="ctrl-status-sub" class="ctrl-status-sub">AN · 100%</div>
+          </div>
+        </div>
+        <button class="ctrl-close-btn" onclick="closeControlCard()" title="Schließen">✕</button>
+      </div>
+
+      <!-- Power Button -->
+      <button id="ctrl-power-btn" class="ctrl-power-btn active" onclick="toggleActiveControlDevice()">
+        <span style="font-size: 1.1rem;">⏻</span>
+        <span id="ctrl-power-text">GERÄT AUSSCHALTEN</span>
+      </button>
+
+      <!-- Dimmer Slider -->
+      <div class="ctrl-section">
+        <div class="ctrl-label-row">
+          <span>🔅 Helligkeit (Dimmen)</span>
+          <span id="ctrl-dim-label" style="color: #38bdf8; font-weight: 700;">100%</span>
+        </div>
+        <input type="range" id="ctrl-dim-slider" class="ctrl-slider" min="1" max="100" value="100" oninput="onControlDimSlider(this.value)" />
+      </div>
+
+      <!-- Color Section -->
+      <div id="ctrl-color-section" class="ctrl-section">
+        <div class="ctrl-label-row">
+          <span>🎨 LED-Farbe</span>
+          <span id="ctrl-color-label" style="font-family: monospace; color: #f43f5e; font-weight: 700;">#ec4899</span>
+        </div>
+        <div class="ctrl-color-grid" id="ctrl-color-presets"></div>
+        <div class="ctrl-picker-row">
+          <span>Eigene Wunschfarbe:</span>
+          <input type="color" id="ctrl-color-picker" class="ctrl-native-picker" oninput="onControlColorPicker(this.value)" onchange="onControlColorPicker(this.value)" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="fpv-hud" style="display: none; position: fixed; inset: 0; pointer-events: none; z-index: 25;">
+    <div id="fpv-hint-pill" data-i18n-html="fpv.hint" style="position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.82); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.16); color: #e2e8f0; padding: 6px 12px; border-radius: 999px; font-size: 0.72rem; white-space: nowrap; box-shadow: 0 6px 20px rgba(0,0,0,0.4);">
+      🚶 <strong>Rundgang:</strong> WASD / Joystick · Ziehen = Umschauen · <code>V</code> = Ende
+    </div>
+    <button onclick="if(window.HouseEditor) HouseEditor.setFpvStartFromCurrentCamera()" data-i18n="fpv.set_start" style="pointer-events: auto; position: absolute; bottom: 22px; right: 22px; width: auto; padding: 7px 12px; border-radius: 999px; font-size: 0.74rem; background: rgba(16, 185, 129, 0.25); border: 1px solid rgba(16, 185, 129, 0.55); color: #d1fae5; backdrop-filter: blur(10px); box-shadow: 0 6px 20px rgba(0,0,0,0.35);">
+      📍 Startpunkt hier setzen
+    </button>
+    <div id="fpv-joystick" style="pointer-events: auto; position: absolute; bottom: 26px; left: 22px; width: 102px; height: 102px; border-radius: 50%; background: rgba(15, 23, 42, 0.55); border: 2px solid rgba(148, 163, 184, 0.35); backdrop-filter: blur(8px); touch-action: none; display: flex; align-items: center; justify-content: center;">
+      <div id="fpv-joystick-knob" style="width: 42px; height: 42px; border-radius: 50%; background: rgba(59, 130, 246, 0.85); border: 2px solid #93c5fd; box-shadow: 0 2px 10px rgba(59, 130, 246, 0.5); transform: translate(0px, 0px); pointer-events: none;"></div>
+    </div>
+  </div>
+
+  <aside id="sidebar" style="display: none;">
+    <div class="sidebar-header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+      <div>
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <h1 style="margin: 0;">✨ Homey 3D</h1>
+          <span id="app-version-badge" style="font-size: 0.7rem; font-weight: 600; padding: 2px 7px; border-radius: 999px; background: rgba(59, 130, 246, 0.18); border: 1px solid rgba(59, 130, 246, 0.4); color: #93c5fd;">v1.1.0</span>
+        </div>
+        <p data-i18n="sidebar.subtitle">Steuere dein Smart Home live im 3D-Grundriss &amp; passe dein Zuhause flexibel an.</p>
+      </div>
+      <button onclick="toggleSidebar()" data-i18n-title="sidebar.close_title" title="Einstellungen schließen" style="width: 32px; height: 32px; padding: 0; border-radius: 50%; flex-shrink: 0;">✕</button>
+    </div>
+
+    <div class="sidebar-tabs" role="tablist">
+      <button class="sidebar-tab active" data-tab="conn" onclick="switchSidebarTab('conn')">
+        <span>🔗</span><span data-i18n="tab.conn">Verbindung</span>
+      </button>
+      <button class="sidebar-tab" data-tab="devices" onclick="switchSidebarTab('devices')">
+        <span>🔌</span><span data-i18n="tab.devices">Geräte</span>
+      </button>
+      <button class="sidebar-tab" data-tab="display" onclick="switchSidebarTab('display')">
+        <span>🎨</span><span data-i18n="tab.display">Optik</span>
+      </button>
+      <button class="sidebar-tab" data-tab="house" onclick="switchSidebarTab('house')">
+        <span>🏠</span><span data-i18n="tab.house">Haus</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: VERBINDUNG -->
+    <div id="tab-conn" class="sidebar-tab-panel active">
+      <div class="section">
+        <div class="section-title">
+          <span data-i18n="conn.title">🔗 Live-Verbindung zu Homey Pro</span>
+          <span id="conn-status" class="conn-badge" data-i18n="conn.offline">Simulation (Offline)</span>
+        </div>
+        <input type="text" id="homey-ip" class="input-field" data-i18n-placeholder="conn.ip_placeholder" placeholder="Homey Pro IP-Adresse (z.B. 192.168.178.50)" />
+        <input type="password" id="homey-token" class="input-field" data-i18n-placeholder="conn.token_placeholder" placeholder="Homey API-Key (aus my.homey.app -> Einstellungen -> API Keys)" />
+        <div class="btn-row">
+          <button class="success" onclick="connectToHomey()" data-i18n="conn.connect_btn">
+            🔌 Verbinden &amp; in config.json speichern
+          </button>
+        </div>
+        <div data-i18n-html="conn.hint" style="font-size: 0.72rem; color: var(--muted); line-height: 1.35;">
+          💡 <strong>So bekommst du den Key:</strong> Öffne <code>my.homey.app</code> → Zahnrad unten links → <em>API-Keys</em> → <em>Neuer API-Key</em>. Änderungen werden automatisch in <code>config.json</code> gesichert.
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><span data-i18n="lang.title">🌐 Sprache / Language</span></div>
+        <select id="lang-select" class="input-field" onchange="setLanguage(this.value)" style="margin-bottom:0;">
+          <option value="auto" data-i18n="lang.auto">🌐 Automatisch (Browser)</option>
+          <option value="de" data-i18n="lang.de">🇩🇪 Deutsch</option>
+          <option value="en" data-i18n="lang.en">🇬🇧 English</option>
+        </select>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><span data-i18n="conn.widget_title">📱 Homey Dashboard Widget</span></div>
+        <div data-i18n-html="conn.widget_hint" style="font-size: 0.72rem; color: #cbd5e1; line-height: 1.35; margin-bottom: 6px;">
+          In der Homey App: <strong>Dashboards → Stift → Widget (+) → Web</strong>:
+        </div>
+        <input type="text" id="widget-url-box" class="input-field" readonly value="http://localhost:8765/index.html?kiosk=1" onclick="this.select(); navigator.clipboard.writeText(this.value); showToast('📋 URL kopiert!');" style="margin-bottom: 2px; font-family: monospace; color: #fde68a; cursor: pointer;" />
+      </div>
+
+      <div class="section">
+        <div class="section-title"><span data-i18n="conn.config_title">💾 Konfiguration (config.json)</span></div>
+        <div class="btn-row">
+          <button onclick="exportFullConfig()" data-i18n="conn.export">📤 Export JSON</button>
+          <button onclick="document.getElementById('file-import-config').click()" data-i18n="conn.import">📥 Import JSON</button>
+        </div>
+        <input type="file" id="file-import-config" accept=".json,application/json" style="display:none" onchange="importFullConfig(this)" />
+      </div>
+    </div>
+
+    <!-- TAB 2: GERÄTE & MAPPING -->
+    <div id="tab-devices" class="sidebar-tab-panel">
+      <div class="section" style="flex: 1;">
+        <div class="section-title">
+          <span data-i18n="dev.title">🔌 Räume &amp; Geräte-Verknüpfung</span>
+          <span style="font-size:0.7rem;color:#60a5fa;">3D-Live</span>
+        </div>
+        <div data-i18n="dev.hint" style="font-size: 0.72rem; color: var(--muted); margin-bottom: 8px; line-height: 1.35;">
+          Klicke auf ein Gerät zum Schalten oder weise ihm im Dropdown dein echtes Homey-Gerät zu.
+        </div>
+        <div id="rooms-list"></div>
+      </div>
+    </div>
+
+    <!-- TAB 3: OPTIK & DARSTELLUNG -->
+    <div id="tab-display" class="sidebar-tab-panel">
+      <div class="section">
+        <div class="section-title">
+          <span data-i18n="disp.title">🖼️ Hintergrund &amp; Wallpaper-Stil</span>
+          <span style="font-size:0.7rem;color:#38bdf8;">Desktop / Mobile</span>
+        </div>
+
+        <div class="theme-grid-selector" id="theme-selector-grid">
+          <button class="theme-btn active" data-theme="mica" onclick="setBackgroundTheme('mica')">
+            <span class="theme-btn-icon">🪟</span>
+            <span class="theme-btn-title">Windows Mica</span>
+            <span class="theme-btn-desc">Taskbar-Flow</span>
+          </button>
+          <button class="theme-btn" data-theme="oled" onclick="setBackgroundTheme('oled')">
+            <span class="theme-btn-icon">📱</span>
+            <span class="theme-btn-title">OLED Schwarz</span>
+            <span class="theme-btn-desc">iPhone &amp; Akku</span>
+          </button>
+          <button class="theme-btn" data-theme="bloom" onclick="setBackgroundTheme('bloom')">
+            <span class="theme-btn-icon">🌌</span>
+            <span class="theme-btn-title">Aurora Bloom</span>
+            <span class="theme-btn-desc">Win 11 Schein</span>
+          </button>
+          <button class="theme-btn" data-theme="grid" onclick="setBackgroundTheme('grid')">
+            <span class="theme-btn-icon">📐</span>
+            <span class="theme-btn-title">Studio Grid</span>
+            <span class="theme-btn-desc">Architektur-CAD</span>
+          </button>
+        </div>
+
+        <button class="theme-btn" data-theme="transparent" onclick="setBackgroundTheme('transparent')" style="width: 100%; margin-bottom: 8px;">
+          <span class="theme-btn-icon">✨</span>
+          <span class="theme-btn-title" data-i18n="disp.transparent">Transparenter Hintergrund</span>
+          <span class="theme-btn-desc" data-i18n="disp.transparent_desc">Lässt dein eigenes Desktop-/Lively-Wallpaper durchscheinen</span>
+        </button>
+
+        <div class="btn-row" style="margin-bottom: 6px;">
+          <button id="btn-toggle-pedestal" onclick="togglePedestal()">🏛️ Modell-Podest: AUS</button>
+          <button id="btn-toggle-grid" onclick="toggle3DGrid()">📐 3D-Bodenraster: AN</button>
+        </div>
+
+        <div class="btn-row" style="margin-bottom: 6px;">
+          <button id="btn-toggle-aurora" onclick="toggleAuroraAnim()">🌊 Licht-Animation: AN</button>
+          <button id="btn-toggle-shadow" onclick="toggleGroundShadow()">🕶️ Boden-Schatten: AUS</button>
+        </div>
+
+        <div class="btn-row">
+          <button id="btn-toggle-kiosk" onclick="toggleWallpaperMode()" data-i18n="disp.kiosk_default" style="width: 100%;">
+            🖥️ Wallpaper-Dock: Standard (Taste H)
+          </button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><span data-i18n="disp.lights_title">💡 Beleuchtung &amp; Wände</span></div>
+        <div class="btn-row">
+          <button onclick="setAllLights(false)" data-i18n="disp.all_off">🌑 Alle AUS</button>
+          <button onclick="setAllLights(true)" data-i18n="disp.all_on">💡 Alle AN</button>
+        </div>
+        <div class="slider-row">
+          <span data-i18n="disp.ambient">Grundhelligkeit:</span>
+          <input type="range" id="ambient-slider" min="0.08" max="1.2" step="0.05" value="0.35" oninput="updateAmbient(this.value)" />
+        </div>
+        <div class="slider-row">
+          <span data-i18n="disp.wall_height">Wandhöhe:</span>
+          <input type="range" id="wall-slider" min="0.8" max="2.6" step="0.1" value="1.8" oninput="updateWallHeight(this.value)" />
+        </div>
+        <div class="btn-row" style="margin-top: 10px;">
+          <button onclick="document.getElementById('file-picture-1').click()" data-i18n="disp.pic1_demo">🖼️ Wandbild 1 (Demo)</button>
+          <button onclick="document.getElementById('file-picture-2').click()" data-i18n="disp.pic2_demo">🖼️ Wandbild 2 (Demo)</button>
+        </div>
+        <input type="file" id="file-picture-1" accept="image/*" style="display:none" onchange="uploadWallPicture(1, this)" />
+        <input type="file" id="file-picture-2" accept="image/*" style="display:none" onchange="uploadWallPicture(2, this)" />
+      </div>
+    </div>
+
+    <!-- TAB 4: HAUS-EDITOR & GRUNDLAGE -->
+    <div id="tab-house" class="sidebar-tab-panel">
+      <!-- SCHRITT 1: HAUS WÄHLEN & EDITOR STARTEN -->
+      <div class="editor-step">
+        <div class="editor-step-header">
+          <span class="editor-step-badge">1</span>
+          <span class="editor-step-title" data-i18n="ed.step1_title">Haus wählen &amp; Editor starten</span>
+          <span id="house-mode-badge" class="conn-badge" style="margin-left:auto;">Demo-Wohnung</span>
+        </div>
+        <div class="editor-step-hint" data-i18n="ed.step1_hint">
+          Wähle eine bestehende Wohnung oder lege eine neue an. Starte dann den Editor.
+        </div>
+        <select id="house-selector" class="input-field" onchange="HouseEditor.selectHouse(this.value)" style="margin-bottom: 8px;">
+          <option value="demo">🏠 Demo-Wohnung (Standard)</option>
+        </select>
+
+        <div class="editor-action-row-3">
+          <button onclick="HouseEditor.setAsDefaultHouse()" data-i18n="ed.btn_default" title="Als Start-Haus festlegen">⭐ Standard</button>
+          <button onclick="HouseEditor.renameActiveHouse()" data-i18n="ed.btn_rename" title="Aktives Haus umbenennen">✏️ Name</button>
+          <button onclick="HouseEditor.deleteActiveHouse()" data-i18n="ed.btn_delete_house" title="Aktives Haus löschen" style="border-color:rgba(239,68,68,0.45);color:#fca5a5;">🗑️ Löschen</button>
+        </div>
+
+        <button id="btn-toggle-house-editor" class="editor-primary-btn" onclick="HouseEditor.toggle()" data-i18n="ed.start">✏️ Haus-Editor starten</button>
+
+        <div class="editor-create-box">
+          <div class="editor-create-label" data-i18n="ed.create_label">Neues Haus anlegen:</div>
+          <input type="text" id="new-house-name" class="input-field" data-i18n-placeholder="ed.new_name_ph" placeholder="Name (z.B. Erdgeschoss)" style="margin:0 0 6px 0;" />
+          <div class="btn-row">
+            <button class="success" onclick="HouseEditor.addHouse('starter')" data-i18n="ed.new_starter">➕ 2-Zimmer-Vorlage</button>
+            <button onclick="HouseEditor.addHouse('empty')" data-i18n="ed.new_empty">➕ Leeres Haus</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCHRITT 2: GRUNDRISS BAUEN -->
+      <div class="editor-step">
+        <div class="editor-step-header">
+          <span class="editor-step-badge">2</span>
+          <span class="editor-step-title" data-i18n="ed.step2_title">Grundriss bauen (Räume &amp; Wände)</span>
+        </div>
+        <div class="editor-step-hint" data-i18n="ed.step2_hint">
+          Wähle ein Werkzeug und klicke 2× im Grundriss (Startpunkt → Endpunkt).
+        </div>
+        <div class="editor-tool-grid">
+          <button class="editor-tool-btn" data-ed-tool="room" onclick="HouseEditor.setTool('room')" data-i18n="ed.tool_room">⬜ Raum</button>
+          <button class="editor-tool-btn" data-ed-tool="wall" onclick="HouseEditor.setTool('wall')" data-i18n="ed.tool_wall">🧱 Wand</button>
+          <button class="editor-tool-btn" data-ed-tool="window" onclick="HouseEditor.setTool('window')" data-i18n="ed.tool_window">🪟 Fenster</button>
+          <button class="editor-tool-btn" data-ed-tool="door" onclick="HouseEditor.setTool('door')" data-i18n="ed.tool_door">🚪 Tür</button>
+        </div>
+
+        <div id="ed-sub-wall" class="editor-subpanel hidden">
+          <label style="font-size:0.72rem;color:var(--muted);" data-i18n="ed.wall_type">Wand-Typ:</label>
+          <select class="input-field" onchange="HouseEditor.setWallKind(this.value)" style="margin-top:4px;margin-bottom:0;">
+            <option value="outer" data-i18n="ed.wall_outer">Außenwand (dick)</option>
+            <option value="inner" data-i18n="ed.wall_inner">Innenwand</option>
+            <option value="glass" data-i18n="ed.wall_glass">Glaswand</option>
+          </select>
+        </div>
+
+        <div id="ed-sub-room" class="editor-subpanel hidden">
+          <label style="font-size:0.72rem;color:var(--muted);" data-i18n="ed.room_name_floor">Raum-Name &amp; Boden:</label>
+          <div style="display:flex;gap:6px;margin-top:4px;">
+            <input type="text" id="ed-room-name" class="input-field" value="Neuer Raum" style="margin:0;flex:1;" />
+            <select class="input-field" onchange="HouseEditor.setRoomFloor(this.value)" style="margin:0;width:110px;">
+              <option value="wood" data-i18n="ed.floor_wood">Eiche</option>
+              <option value="tile" data-i18n="ed.floor_tile">Badfliese</option>
+              <option value="hall" data-i18n="ed.floor_hall">Flur</option>
+              <option value="kitchen" data-i18n="ed.floor_kitchen">Küche</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCHRITT 3: EINRICHTEN & GERÄTE -->
+      <div class="editor-step">
+        <div class="editor-step-header">
+          <span class="editor-step-badge">3</span>
+          <span class="editor-step-title" data-i18n="ed.step3_title">Einrichten &amp; Geräte platzieren</span>
+        </div>
+        <div class="editor-step-hint" data-i18n-html="ed.step3_hint">
+          Klicke ins 3D-Haus zum Platzieren. Mit <b>R</b> drehst du die Vorschau.
+        </div>
+        <div class="editor-tool-grid">
+          <button class="editor-tool-btn" data-ed-tool="furniture" onclick="HouseEditor.setTool('furniture')" data-i18n="ed.tool_furniture">🛋️ Möbel</button>
+          <button class="editor-tool-btn" data-ed-tool="device" onclick="HouseEditor.setTool('device')" data-i18n="ed.tool_device">💡 Gerät</button>
+          <button class="editor-tool-btn" data-ed-tool="picture" onclick="HouseEditor.setTool('picture')" data-i18n="ed.tool_picture">🖼️ Bild (max. 5)</button>
+          <button class="editor-tool-btn" data-ed-tool="fpv_start" onclick="HouseEditor.setTool('fpv_start')" data-i18n="ed.tool_fpv_start">🚶 Startpunkt</button>
+        </div>
+
+        <div id="ed-sub-furniture" class="editor-subpanel hidden">
+          <label style="font-size:0.72rem;color:var(--muted);" data-i18n="ed.furn_label">Möbelstück &amp; Drehung:</label>
+          <div style="display:flex;gap:6px;margin-top:4px;">
+            <select class="input-field" onchange="HouseEditor.setFurnitureType(this.value)" style="margin:0;flex:1;">
+              <option value="sofa">🛋️ Sofa</option>
+              <option value="bed">🛏️ Doppelbett</option>
+              <option value="desk">🖥️ Schreibtisch</option>
+              <option value="dining_table">🍽️ Esstisch</option>
+              <option value="lowboard">📺 TV-Lowboard</option>
+              <option value="kitchen">🍳 Küchenzeile</option>
+              <option value="shower">🚿 Dusche</option>
+              <option value="vanity">🚰 Waschtisch</option>
+              <option value="toilet">🚽 WC</option>
+              <option value="shelf">📚 Regal</option>
+              <option value="plant">🪴 Pflanze</option>
+              <option value="roborock_dock">🤖 Saugroboter-Dock</option>
+            </select>
+            <button onclick="HouseEditor.rotateSelectionOrGhost(-Math.PI/4)" title="45° links">↺</button>
+            <button onclick="HouseEditor.rotateSelectionOrGhost(Math.PI/4)" title="45° rechts">↻</button>
+          </div>
+        </div>
+
+        <div id="ed-sub-device" class="editor-subpanel hidden">
+          <label style="font-size:0.72rem;color:var(--muted);" data-i18n="ed.dev_label">Gerät (Typ &amp; Name):</label>
+          <div style="display:flex;gap:6px;margin-top:4px;">
+            <select class="input-field" onchange="HouseEditor.setDeviceType(this.value)" style="margin:0;width:125px;">
+              <option value="light">💡 Licht</option>
+              <option value="led">🌈 LED</option>
+              <option value="sensor">📡 Sensor</option>
+              <option value="tv">📺 TV</option>
+              <option value="media">🗣️ Speaker</option>
+              <option value="hub">🌐 Hub</option>
+            </select>
+            <input type="text" id="ed-device-name" class="input-field" value="Neues Licht" style="margin:0;flex:1;" />
+          </div>
+        </div>
+
+        <div id="ed-sub-picture" class="editor-subpanel hidden">
+          <label style="font-size:0.72rem;color:var(--muted);" data-i18n="ed.pic_label">Wandbild (max. 5 pro Haus):</label>
+          <div class="btn-row" style="margin-top:4px;">
+            <button onclick="document.getElementById('ed-picture-file').click()" data-i18n="ed.pic_choose">🖼️ Bilddatei wählen</button>
+            <button onclick="HouseEditor.rotateSelectionOrGhost(Math.PI/4)" data-i18n="ed.pic_rotate">↻ 45° drehen</button>
+          </div>
+          <div id="ed-picture-preview" data-i18n="ed.pic_none" style="margin-top:6px;font-size:0.7rem;color:var(--muted);">Noch kein Bild gewählt (es wird ein grauer Rahmen platziert).</div>
+          <input type="file" id="ed-picture-file" accept="image/*" style="display:none" onchange="HouseEditor.setPendingPictureFile(this)" />
+        </div>
+      </div>
+
+      <!-- SCHRITT 4: AUSWÄHLEN, VERSCHIEBEN, DREHEN & LÖSCHEN -->
+      <div class="editor-step">
+        <div class="editor-step-header">
+          <span class="editor-step-badge">4</span>
+          <span class="editor-step-title" data-i18n="ed.step4_title">Bearbeiten, Verschieben &amp; Löschen</span>
+        </div>
+        <div class="editor-tool-grid">
+          <button class="editor-tool-btn active" data-ed-tool="select" onclick="HouseEditor.setTool('select')" data-i18n="ed.tool_select">👆 Auswählen</button>
+          <button class="editor-tool-btn" data-ed-tool="delete" onclick="HouseEditor.setTool('delete')" data-i18n="ed.tool_delete" style="border-color: rgba(239,68,68,0.4);">🗑️ Gezielt löschen</button>
+        </div>
+
+        <div id="ed-inspector" class="editor-inspector">
+          <div class="editor-step-hint" data-i18n-html="ed.insp_empty" style="margin-bottom:0;">
+            Klicke im 3D-Haus auf ein Objekt (Möbel, Gerät, Wandbild, Wand, Raum oder Startpunkt), um es direkt per <b>Drag &amp; Drop</b> zu verschieben, zu drehen, umzubenennen oder gezielt zu löschen.
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title"><span data-i18n="ed.file_title">📦 Haus-Datei Export / Import</span></div>
+        <div class="btn-row">
+          <button onclick="HouseEditor.exportHouse()" data-i18n="ed.export_house">📤 Haus exportieren</button>
+          <button onclick="document.getElementById('file-import-house').click()" data-i18n="ed.import_house">📥 Haus importieren</button>
+        </div>
+        <input type="file" id="file-import-house" accept=".json,application/json" style="display:none" onchange="HouseEditor.importHouse(this)" />
+      </div>
+    </div>
+  </aside>
+
+  <!-- Three.js + OrbitControls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <script src="/api/bootstrap.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/scene-core.js"></script>
+  <script src="js/devices-3d.js"></script>
+  <script src="js/homey-api.js"></script>
+  <script src="js/animations-fpv.js"></script>
+  <script src="local/wohnung-daniel.js"></script>
+  <script src="js/house-editor.js"></script>
+</body>
+</html>

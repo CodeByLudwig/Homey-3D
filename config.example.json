@@ -1,0 +1,23 @@
+{
+  "connections": {
+    "homey": {
+      "ip": "192.168.1.100",
+      "token": "DEIN_HOMEY_API_KEY"
+    }
+  },
+  "mapping": {},
+  "settings": {
+    "theme": "mica",
+    "wallHeight": 1.8,
+    "ambient": 0.35,
+    "showLabels": true,
+    "showGrid": true,
+    "showPedestal": false,
+    "auroraAnim": true,
+    "groundShadow": false
+  },
+  "pictures": [],
+  "defaultHouseId": "demo",
+  "activeHouseId": "demo",
+  "houses": []
+}

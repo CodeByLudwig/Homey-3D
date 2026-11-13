@@ -1,0 +1,25 @@
+{
+  "name": "homey-3d",
+  "version": "1.0.0",
+  "description": "Interaktiver 3D-Grundriss & Live Smart-Home-Steuerung für Homey Pro",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CodeByLudwig/homey-3d.git"
+  },
+  "keywords": [
+    "homey",
+    "homey-pro",
+    "smart-home",
+    "threejs",
+    "3d-dashboard",
+    "pwa"
+  ],
+  "license": "GPL-3.0",
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
